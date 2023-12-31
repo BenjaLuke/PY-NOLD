@@ -19,19 +19,38 @@ def languaje_menu(language_code):
     
 def languaje_difficulty(language_code):
     language_dict = {
-        0: ["DIFICULTAD","","Pasos extra","Puntos consumidos el coger","Puertas y ventanas cerradas","???","Puntos consumidos al conseguir madera","Puntos consumidos al clavar madera","Daño","","Volver"],
-        1: ["DIFICULTAT","","Passos extra","Punts consumits al agafar","Portes i finestres tancades","???","Punts consumits al aconseguir fusta","Punts consumits al clavar fusta","Dany","","Tornar"],
-        2: ["DIFFICULTY","","Extra steps","Points consumed when picking up","Closed doors and windows","???","Points consumed when getting wood","Points consumed when nailing wood","Damage","","Back"],
-        3: ["DIFICULTADE","","Pasos extra","Puntos consumidos al coger","Portas e fiestras pechadas","???","Puntos consumidos ao conseguir madeira","Puntos consumidos ao cravar madeira","Dano","","Volver"],
-        4: ["ZAILTASUNA","","Pauso gehiago","Puntuak kontsumituak","Ateak eta leihoak itxita","???","Puntuak kontsumituak egurra lortzean","Puntuak kontsumituak egurra marratzean","Minak","","Itzuli"],
-        5: ["DIFFICULTÉ","","Pas supplémentaires","Points consommés en ramassant","Portes et fenêtres fermées","???","Points consommés en obtenant du bois","Points consommés en clouant du bois","Dommage","","Retour"],
-        6: ["SCHWIERIGKEIT","","Extra Schritte","Punkte verbraucht beim Aufnehmen","Geschlossene Türen und Fenster","???","Punkte verbraucht beim Holz bekommen","Punkte verbraucht beim Holz nageln","Schaden","","Zurück"],
-        7: ["DIFFICOLTÀ","","Passi extra","Punti consumati nel raccogliere","Porte e finestre chiuse","???","Punti consumati nel ottenere legno","Punti consumati nel inchiodare legno","Danno","","Indietro"],
-        8: ["DIFICULDADE","","Passos extra","Pontos consumidos ao apanhar","Portas e janelas fechadas","???","Pontos consumidos ao conseguir madeira","Pontos consumidos ao pregar madeira","Dano","","Voltar"],
-        9: ["DIFICULTAT","","Pasos extra","Puntos consumidos el coger","Puertas y ventanas cerradas","???","Puntos consumidos al conseguir madera","Puntos consumidos al clavar madera","Daño","","Volver"],
-        10: ["DIFICULTÁ","","Pasus extra","Puntuos consumíus al coger","Puertas y ventanas cerrás","???","Puntuos consumíus al consiguir madera","Puntuos consumíus al clavar madera","Daño","","Volver"],
-        11: ["DIFICULTÁ","","Pasos extra","Puntos consumidos el coger","Puertas y ventanas cerradas","???","Puntos consumidos al conseguir madera","Puntos consumidos al clavar madera","Daño","","Volver"],
-        12: ["DIFICULTAT","","Pasos extra","Puntos consumidos el coger","Puertas y ventanas cerradas","???","Puntos consumidos al conseguir madera","Puntos consumidos al clavar madera","Daño","","Volver"]
+        0: ["DIFICULTAD","","Movimiento","Objetos por turno","Puertas y ventanas cerradas","Sucesos","Conseguir madera","Reforzar con madera","Ataque","","Volver"],
+        1: ["DIFICULTAT","","Moviment","Objectes per torn","Portes i finestres tancades","Successos","Aconseguir fusta","Reforçar amb fusta","Atac","","Tornar"],
+        2: ["DIFFICULTY","","Movement","Objects per turn","Closed doors and windows","Events","Get wood","Reinforce with wood","Attack","","Back"],
+        3: ["DIFICULTADE","","Movimento","Obxectos por turno","Portas e fiestras pechadas","Sucesos","Conseguir madeira","Reforzar con madeira","Ataque","","Volver"],
+        4: ["ZAILTASUNA","","Mugimendua","Objektuak txandako","Itxita dauden ateak eta leihoak","Gertaerak","Zureganako egurra","Egurragaz bermatu","Atakea","","Atzera"],
+        5: ["DIFFICULTY","","Movement","Objects per turn","Closed doors and windows","Events","Get wood","Reinforce with wood","Attack","","Back"],
+        6: ["SCHWIERIGKEIT","","Bewegung","Objekte pro Runde","Geschlossene Türen und Fenster","Ereignisse","Holz bekommen","Mit Holz verstärken","Angriff","","Zurück"],
+        7: ["DIFFICOLTÀ","","Movimento","Oggetti per turno","Porte e finestre chiuse","Eventi","Ottenere legno","Rinforzare con legno","Attacco","","Indietro"],
+        8: ["DIFICULDADE","","Movimento","Objetos por turno","Portas e janelas fechadas","Eventos","Obter madeira","Reforçar com madeira","Ataque","","Voltar"],
+        9: ["DIFICULTAD","","Movimiento","Objetos por turno","Puertas y ventanas cerradas","Sucesos","Conseguir madera","Reforzar con madera","Ataque","","Volver"],
+        10: ["DIFICURTÁ","","Movimiento","Ohetos por turno","Puertah y ventanah cerrah","Sucesoh","Conseguí madera","Reforzá con madera","Ataque","","Volvé"],
+        11: ["DIFICULTÁ","","Movimientu","Obxetos por tornu","Puertes y finestres zarrades","Sucesos","Conseguir madera","Reforzar con madera","Ataque","","Volver"],
+        12: ["DIFICULTAT","","Moviment","Objectes per torn","Portes i finestres tancades","Successos","Aconseguir fusta","Reforçar amb fusta","Atac","","Tornar"]
+    }
+    
+    return language_dict.get(language_code, [])
+
+def languaje_cast(language_code):
+    language_dict = {
+        0: ["CRÉDITOS","","Idea y desarrollo: Benjamín Miguel","Gráficos: Jana Vera","Música: Jorge Varela","Testeo: ---","Traducción: Manuel Barroso","Agradecimientos: Luis Valbuena","","Volver"],
+        1: ["CRÉDITS","","Idea i desenvolupament: Benjamín Miguel","Gràfics: Jana Vera","Música: Jorge Varela","Test: ---","Traducció: Manuel Barroso","Agraïments: Luis Valbuena","","Tornar"],
+        2: ["CREDITS","","Idea and development: Benjamín Miguel","Graphics: Jana Vera","Music: Jorge Varela","Test: ---","Translation: Manuel Barroso","Thanks: Luis Valbuena","","Back"],
+        3: ["CRÉDITOS","","Idea e desenvolvemento: Benjamín Miguel","Gráficos: Jana Vera","Música: Jorge Varela","Testeo: ---","Tradución: Manuel Barroso","Agradecementos: Luis Valbuena","","Volver"],
+        4: ["KREDITUAK","","Idea eta garapena: Benjamín Miguel","Grafikoak: Jana Vera","Musika: Jorge Varela","Testeo: ---","Itzulpena: Manuel Barroso","Eskerrik asko: Luis Valbuena","","Atzera"],
+        5: ["CRÉDITS","","Idea et développement: Benjamín Miguel","Graphiques: Jana Vera","Musique: Jorge Varela","Test: ---","Traduction: Manuel Barroso","Merci: Luis Valbuena","","Retour"],
+        6: ["KREDITE","","Idee und Entwicklung: Benjamín Miguel","Grafiken: Jana Vera","Musik: Jorge Varela","Test: ---","Übersetzung: Manuel Barroso","Danke: Luis Valbuena","","Zurück"],
+        7: ["CREDITI","","Idea e sviluppo: Benjamín Miguel","Grafica: Jana Vera","Musica: Jorge Varela","Test: ---","Traduzione: Manuel Barroso","Grazie: Luis Valbuena","","Indietro"],
+        8: ["CRÉDITOS","","Idea e desenvolvimento: Benjamín Miguel","Gráficos: Jana Vera","Música: Jorge Varela","Testeo: ---","Tradução: Manuel Barroso","Agradecimentos: Luis Valbuena","","Voltar"],
+        9: ["CRÉDITOS","","Idea y desarrollo: Benjamín Miguel","Gráficos: Jana Vera","Música: Jorge Varela","Testeo: ---","Traducción: Manuel Barroso","Agradecimientos: Luis Valbuena","","Volver"],
+        10: ["CRÉDITOH","","Idea y desarrollo: Benjamín Miguel","Gráficoh: Jana Vera","Múhicah: Jorge Varela","Tehteo: ---","Tradución: Manuel Barroso","Tradución: ---","Agradecimientoh: Luis Valbuena","","Volvé"],
+        11: ["CRÉDITOS","","Idea y desenvolvimientu: Benjamín Miguel","Gráficos: Jana Vera","Música: Jorge Varela","Testeo: ---","Traducción: Manuel Barroso","Agradecimientos: Luis Valbuena","","Volver"],
+        12: ["CRÉDITS","","Idea i desenvolupament: Benjamín Miguel","Gràfics: Jana Vera","Música: Jorge Varela","Test: ---","Traducció: Manuel Barroso","Agraïments: Luis Valbuena","","Tornar"]
     }
     
     return language_dict.get(language_code, [])
