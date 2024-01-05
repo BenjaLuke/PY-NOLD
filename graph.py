@@ -1,6 +1,8 @@
 import pygame
+import random
 
 import languaje
+import objects
 
 class image:
     
@@ -10,33 +12,44 @@ class image:
         
         screen_info =               pygame.display.Info()
         self.width =                screen_info.current_w
-        
         # self.width = 1000
         self.height =               (self.width*1440)/3440
-        
-        self.screen =               pygame.display.set_mode((self.width, self.height),)
-        pygame.display.set_caption("NOLD")
-        
+        # Crea la pantalla de juego global
+        self.screen =               pygame.display.set_mode((self.width, self.height),) 
+        # Titulo de la ventana
+        pygame.display.set_caption("NOLD")  
+        # Idioma del juego
         self.language = languaje
-        
+        # Imágenes para los menús
         self.house_title =          pygame.image.load("ART/HOUSE_TITLE.png")
         self.house_title =          pygame.transform.scale(self.house_title, (int((self.width*1909)/3440), int((self.height*835)/1440)))  
         self.shine_title =          pygame.image.load("ART/SHINE_TITLE.png")
         self.shine_title =          pygame.transform.scale(self.shine_title, (int((self.width*2249)/3440), int((self.height*2245)/1440)))
         self.title =                pygame.image.load("ART/TITLE.png")
         self.title =                pygame.transform.scale(self.title, (int((self.width*(1529/4))/3440), int((self.height*(572/4))/1440)))
-        
-        self.cursor_sprite = CursorSprite("ART/CURSOR_ARROW.png", ((self.width*0.2)/3440))
-
         self.blood_title =          pygame.image.load("ART/BLOOD_TITLE.png")
         self.blood_title =          pygame.transform.scale(self.blood_title, (int((self.width*600)/3440),int((self.height*50)/1440)))      
         self.blood_diffic =         pygame.image.load("ART/BLOOD_DIFFIC.png")
-        self.blood_diffic =         pygame.transform.scale(self.blood_diffic, (int((self.width*80)/3440),int((self.height*80)/1440)))
-                
+        self.blood_diffic =         pygame.transform.scale(self.blood_diffic, (int((self.width*80)/3440),int((self.height*80)/1440)))        
+        # Imagen para el cursor
+        self.cursor_sprite = CursorSprite("ART/CURSOR_ARROW.png", ((self.width*0.2)/3440))
+        # Tipografía global                
         self.type =                 pygame.font.Font("ART/typeg.ttf", int((self.width*50)/3440))
-        
+        # Audios
         self.sound_title =          pygame.mixer.Sound("ART/MENU_SOUND.wav")
         self.sound_click =          pygame.mixer.Sound("ART/CLICK_SOUND.wav")
+        # Constantes
+        self.turns =                7 # Esto indica el máximo de turnos que rota. En el juego siembre será 7, pero para test puede cambiarse
+        # Variables
+        self.turn =                 0 # Esto indica el turno actual (1 = Barbara, 2 = Ben, 3 = Harry, 4 = Hellen, 5 = Tom, 6 = Judy, 7 = zombis)
+        self.zombiesOnStage =       0 # Esto indica el número de zombis que hay en el escenario
+        self.hour =                 0 # Esto indica la hora actual
+        
+        self.event_cards=           [] # Aquí se guardan las cartas de eventos
+        self.zombies_cards=         [] # Aquí se guardan las cartas de zombies (se rellena en el reset)
+        self.items_cards=           [] # Aquí se guardan las cartas de objetos
+        self.items_cards_2=         [] # Aquí se guardan las cartas de objetos durante la preparación de la partida
+        self.items_cards_3=         [] # Aquí se guardan las cartas de objetos durante la partida
         
     def Menu(self):
         
@@ -204,8 +217,8 @@ class image:
                                         if position_mouse[1] > self.height/2 - options.get_height()/2 + control_position and position_mouse[1] < self.height/2 - options.get_height()/2 + control_position + ((self.height*50)/1440):
                                             difficulty[possibilities] += 1
                                             self.sound_click.play()
-                                            if possibilities == 2 and difficulty[possibilities] > 28:
-                                                difficulty[possibilities] = 28
+                                            if possibilities == 2 and difficulty[possibilities] > 30:
+                                                difficulty[possibilities] = 30
                                             elif possibilities != 2 and difficulty[possibilities] > 3:
                                                 difficulty[possibilities] = 3
                                         control_position += ((self.height*45)/1440)
@@ -258,6 +271,269 @@ class image:
             
         return       
     
+    def playing(self):
+        return
+    
+    def ResetValues(self):
+        # Entrega el turno a Barbara
+        self.turn =                1
+        # Crea las barajas
+        datas = open("SAVE/cards_zombies.txt", "r")
+        self.zombies_cards_str = datas.readline()
+        self.zombies_cards = eval(self.zombies_cards_str)
+        datas.close()
+        # (1 - 1 zombi, 2 - 2 zombis, 3 - 3 zombis, 4 - 4 zombis, 5 - 5 zombis, 6 - 6 zombis, 7 - fuga)
+        datas = open("SAVE/cards_events.txt", "r")
+        self.event_cards_str = datas.readline()
+        self.event_cards = eval(self.event_cards_str)
+        datas.close()
+        # (1 - Agresión, 2 - Nuerte, 3 - Pánico, 4 - Pasa una hora, 5 - Serenidad, 6 - zombi, 8 - Zombies en la gasolinera)
+        datas = open("SAVE/cards_items.txt", "r")
+        self.items_cards_str = datas.readline()
+        self.items_cards = eval(self.items_cards_str)
+        datas.close()
+        # (1 - Botella, 2 - Cartuchos , 3 - clavos, 4 - Cuchillo, 5 - Cuerda, 6 - Escopeta, 7 - Espátula, 8 - Gasolina, 9 - Hacha, 10 - Llave, 11 - Martillo, 12 - Mechero, 13 - Pañuelo, 14 - Pico, 15 - zombi)
+        self.items_cards_2=         [] # De momento está vacía
+        self.items_cards_3=         [] # De momento está vacía
+        # Prepara las barajas
+        # Quita de la baraja de items las cartas de zombi y llave y las mete en la baraja 2
+        for i in range(len(self.items_cards)-1,-1,-1):
+            if self.items_cards[i] == 15 or self.items_cards[i] == 10:
+                self.items_cards_2.append(self.items_cards[i])
+                self.items_cards.pop(i)
+        # Mezcla las cartes de items
+        random.shuffle(self.items_cards)
+        # Apartamos las 10 primeras cartas de items_cards para ponerlas en items_cards_3
+        for i in range(10):
+            self.items_cards_3.append(self.items_cards[i])
+            self.items_cards.pop(i)
+        # Añade a items_cards_3 todas las cartas de items_Cards_2 que estén marcadas como 15 (zombi)
+        for i in range(len(self.items_cards_2)-1,-1,-1):
+            if self.items_cards_2[i] == 15:
+                self.items_cards_3.append(self.items_cards_2[i])
+                self.items_cards_2.pop(i)
+        # Eliminamos todas las cartas de items_cards que superen la número 37
+        not_yet = True
+        while not_yet:
+            self.items_cards_2.append(self.items_cards[-1])
+            self.items_cards.pop(-1)
+            if len(self.items_cards) == 37:
+                not_yet = False
+        # Añadimos la carta de llave a items_Cards:
+        self.items_cards.append(self.items_cards_2[0])
+        self.items_cards_2.pop(0)
+        # Vuelve a mezclar el motón items_cards e items_cards_3
+        random.shuffle(self.items_cards_3)
+        random.shuffle(self.items_cards)        
+        # Mezclamos las cartas de zombies
+        random.shuffle(self.zombies_cards)
+        # Mezclamos las cartas de eventos
+        random.shuffle(self.event_cards)
+        
+        # Crea los objetos
+        # Crea los InsideHouse
+        all_objects_atributes = ((5,1,(11,18),5,1,45),
+                                 (5,1,(11,18),5,1,45),
+                                 (5,1,(11,18),5,1,45),
+                                 (5,1,(11,18),5,1,45),
+                                 (5,1,(11,18),5,3,45),
+                                 (6,1,(11,18),3,2,25),
+                                 (6,1,(11,18),3,3,25),
+                                 (4,1,(11,18),1,2,8),
+                                 (4,1,(11,18),1,1,8),
+                                 (4,1,(11,18),1,1,8),
+                                 (4,1,(11,18),1,1,8),
+                                 (4,1,(11,18),1,1,8),
+                                 (1,1,(11,18),3,1,20),
+                                 (1,1,(11,18),3,1,20),
+                                 (1,1,(11,18),3,2,20),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,1,4),
+                                 (3,1,(11,18),0,2,4),
+                                 (3,1,(11,18),0,2,4),
+                                 (3,1,(11,18),0,2,4),
+                                 (3,1,(11,18),0,3,4),
+                                 (3,1,(11,18),0,3,4),
+                                 (2,1,(11,18),0,1,40),
+                                 (2,1,(11,18),0,1,40),
+                                 (2,1,(11,18),0,3,40))
+        for i in range(15):
+            exec("self.InsideHouse"+str(i)+" = objects.InsideHouse()")
+            exec("self.InsideHouse"+str(i)+".type ="+str(all_objects_atributes[i][0]))
+            exec("self.InsideHouse"+str(i)+".state ="+str(all_objects_atributes[i][1]))
+            exec("self.InsideHouse"+str(i)+".location ="+str(all_objects_atributes[i][2]))
+            exec("self.InsideHouse"+str(i)+".capacity ="+str(all_objects_atributes[i][3]))
+            exec("self.InsideHouse"+str(i)+".floor ="+str(all_objects_atributes[i][4]))
+            exec("self.InsideHouse"+str(i)+".wood ="+str(all_objects_atributes[i][5]))
+        
+        # repasamos todos los objetos
+        for i in range (15):
+            # Si es un armario, mesa, estantería o baúl...
+            if eval("self.InsideHouse"+str(i)+".type") == 1 or eval("self.InsideHouse"+str(i)+".type") == 4 or eval("self.InsideHouse"+str(i)+".type") == 5 or eval("self.InsideHouse"+str(i)+".type") == 6:
+
+                # salvamos el valor de capacity en una variable circunstancial
+                e = eval("self.InsideHouse"+str(i)+".capacity")
+                # Si type es igual a armario o baúl...
+                if eval("self.InsideHouse"+str(i)+".type") == 5 or eval("self.InsideHouse"+str(i)+".type") == 6:
+                    # Restamos uno a e
+                    e -= 1
+                # miramos el valor de capacity. Ese número de veces...
+                for a in range(e):
+                    # copiamos el último valor de la lista de items_cards y lo añadimos a items
+                    eval("self.InsideHouse"+str(i)+".items.append(self.items_cards[-1])")
+                    # borramos el último valor de la lista de items_cards
+                    self.items_cards.pop(-1)
+                    
+        # Repasamos una vez más todos los objetos
+        for i in range (15):
+            # Si es una armario, o baúl...
+            if eval("self.InsideHouse"+str(i)+".type") == 5 or eval("self.InsideHouse"+str(i)+".type") == 6:
+                # Añadimos a la lista de items el último valor de la lista de items_cards_3
+                eval("self.InsideHouse"+str(i)+".items.append(self.items_cards_3[-1])")
+                # Borramos el último valor de la lista de items_cards_3
+                self.items_cards_3.pop(-1)
+        # items 2 e items 3 los juntamos en un único paquete (items 2)
+        self.items_cards_2 = self.items_cards_2 + self.items_cards_3
+        self.items_cards_3 = []
+        
+        # Crea las puertas y ventanas
+        # Cogemos el valor del archivo dificulty para saber cuantas puertas y ventanas están cerradas
+        datas = open("SAVE/dif.txt", "r")
+        difficulty_str = datas.readline()
+        difficulty = eval(difficulty_str)
+        datas.close()
+        windoor_difficulty = difficulty[2]
+        all_windoor_atributes = ((1,1,(13,11),0,1,20,0,1,2),
+                                 (1,1,(14,11),0,1,20,0,2,2),
+                                 (1,1,(23,11),0,1,20,0,1,2),
+                                 (1,1,(24,11),0,1,20,0,2,2),
+                                 (2,1,(16,11),0,1,4,0,1,2),
+                                 (2,1,(17,11),0,1,4,0,2,2),
+                                 (2,1,(26,11),0,1,4,0,1,2),
+                                 (2,1,(27,11),0,1,4,0,2,2),
+                                                                  
+                                 (2,1,(11,17),0,1,4,0,1,2),
+                                 (2,1,(11,18),0,1,4,0,1,2),
+                                 (2,1,(11,24),0,1,4,0,1,2),
+                                 (2,1,(11,25),0,1,4,0,1,2),
+                                 (1,1,(11,28),0,1,20,0,1,2),
+                                 (1,1,(11,29),0,1,20,0,1,2),
+                                 
+                                 (2,1,(31,16),0,1,4,0,2,1),
+                                 (2,1,(31,17),0,1,4,0,2,1),
+                                 (1,1,(31,24),0,1,20,0,2,1),
+                                 (1,1,(31,25),0,1,20,0,2,1),
+                                 (2,1,(31,29),0,1,4,0,2,1),
+                                 
+                                 (2,1,(13,30),0,1,4,0,1,1),
+                                 (2,1,(14,30),0,1,4,0,2,1),
+                                 (1,1,(21,30),0,1,20,0,1,1),
+                                 (1,1,(22,30),0,1,20,0,2,1),
+                                 (2,1,(26,30),0,1,4,0,1,1),
+                                 (2,1,(27,30),0,1,4,0,2,1),
+                                 (2,1,(30,30),0,1,4,0,2,1),
+                                 
+                                 (2,1,(18,32),0,1,4,0,3,2),
+                                 (2,1,(21,33),0,1,4,0,1,1),
+                                 (1,1,(22,33),0,1,20,0,2,1),
+                                 (1,1,(24,32),0,1,20,0,3,1),
+                                 
+                                 (1,1,(14,21),0,1,20,0,1,1),
+                                 (1,1,(15,21),0,1,20,0,2,1),
+                                 (1,1,(16,16),0,1,20,0,3,1),
+                                 (1,1,(16,17),0,1,20,0,4,1),
+                                 (1,1,(20,17),0,1,20,0,1,2),
+                                 (1,1,(21,17),0,1,20,0,2,2),
+                                 (1,1,(26,17),0,1,20,0,3,2),
+                                 (1,1,(26,18),0,1,20,0,4,2),
+                                 (1,1,(27,21),0,1,20,0,1,1),
+                                 (1,1,(28,21),0,1,20,0,2,1),
+                                 
+                                 (1,1,(18,22),1,1,200,0,1,1),
+                                 
+                                 (2,1,(17,16),0,3,4,0,3,2),
+                                 (2,1,(17,17),0,3,4,0,4,2),
+                                 (2,1,(17,21),0,3,4,0,3,2),
+                                 (2,1,(17,22),0,3,4,0,4,2),
+                                 (2,1,(21,15),0,3,4,0,1,2),
+                                 (2,1,(22,15),0,3,4,0,2,2),
+                                 (2,1,(26,17),0,3,4,0,3,1),
+                                 (2,1,(26,18),0,3,4,0,4,1),
+                                 (2,1,(26,21),0,3,4,0,3,1),
+                                 (2,1,(26,22),0,3,4,0,4,1),
+                                 (2,1,(21,24),0,3,4,0,1,1),
+                                 (2,1,(25,24),0,3,4,0,2,1))
+        
+        for i in range(len(all_windoor_atributes)):
+            exec("self.windoor"+str(i)+" = objects.WindowDoor()")
+            exec("self.windoor"+str(i)+".type ="+str(all_windoor_atributes[i][0]))
+            exec("self.windoor"+str(i)+".state ="+str(all_windoor_atributes[i][1]))
+            exec("self.windoor"+str(i)+".location ="+str(all_windoor_atributes[i][2]))
+            exec("self.windoor"+str(i)+".harder ="+str(all_windoor_atributes[i][3]))
+            exec("self.windoor"+str(i)+".floor ="+str(all_windoor_atributes[i][4]))
+            exec("self.windoor"+str(i)+".resistence ="+str(all_windoor_atributes[i][5]))
+            exec("self.windoor"+str(i)+".wood ="+str(all_windoor_atributes[i][6]))
+            exec("self.windoor"+str(i)+".hinge ="+str(all_windoor_atributes[i][7]))
+            exec("self.windoor"+str(i)+".open ="+str(all_windoor_atributes[i][8]))
+            
+        # Cerramos puertas y ventanas que tocan
+        for i in range(windoor_difficulty):
+            trying = True
+            while trying:
+                # Cogemos un número aleatorio entre 0 y len(all_windoor_atributes)
+                a = random.randint(0,len(all_windoor_atributes)-1)
+                # Si la puerta o ventana está abierta y su harder es 0 y su floor es 1 y (su x es 11 o 18 o 29 o 31 o su y es 11 o 30 o 33) 
+                if all_windoor_atributes[a][1] == 1 and all_windoor_atributes[a][3] == 0 and all_windoor_atributes[a][4] == 1 and (all_windoor_atributes[a][2][0] == 11 or all_windoor_atributes[a][2][0] == 18 or all_windoor_atributes[a][2][0] == 29 or all_windoor_atributes[a][2][0] == 31 or all_windoor_atributes[a][2][1] == 11 or all_windoor_atributes[a][2][1] == 30 or all_windoor_atributes[a][2][1] == 33):
+                    # La cerramos
+                    exec("self.windoor"+str(a)+".state = 0")
+                    trying = False  
+                                  
+        # Crea los personajes
+        
+        self.zombiesOnStage = 0 # Contador de zombies en el escenario
+        self.hour = 20 # Hora actual
+        
+        # Pintamos por pantalla una tabla de cada uno de los objetos poniendo (atributo: valor)
+        # Pintamos el resto de variables del juego (atributo: valor)
+        for i in range(15):
+            print("InsideHouse"+str(i)+":")
+            print("type: "+str(eval("self.InsideHouse"+str(i)+".type")))
+            print("state: "+str(eval("self.InsideHouse"+str(i)+".state")))
+            print("location: "+str(eval("self.InsideHouse"+str(i)+".location")))
+            print("capacity: "+str(eval("self.InsideHouse"+str(i)+".capacity")))
+            print("floor: "+str(eval("self.InsideHouse"+str(i)+".floor")))
+            print("wood: "+str(eval("self.InsideHouse"+str(i)+".wood")))
+            print("items: "+str(eval("self.InsideHouse"+str(i)+".items")))
+            print("")
+        
+        for i in range(len(all_windoor_atributes)):
+            print("windoor"+str(i)+":")
+            print("type: "+str(eval("self.windoor"+str(i)+".type")))
+            print("state: "+str(eval("self.windoor"+str(i)+".state")))
+            print("location: "+str(eval("self.windoor"+str(i)+".location")))
+            print("harder: "+str(eval("self.windoor"+str(i)+".harder")))
+            print("floor: "+str(eval("self.windoor"+str(i)+".floor")))
+            print("resistence: "+str(eval("self.windoor"+str(i)+".resistence")))
+            print("wood: "+str(eval("self.windoor"+str(i)+".wood")))
+            print("hinge: "+str(eval("self.windoor"+str(i)+".hinge")))
+            print("open: "+str(eval("self.windoor"+str(i)+".open")))
+            print("")    
+        print("turn: "+str(self.turn))
+        print("zombiesOnStage: "+str(self.zombiesOnStage))
+        print("hour: "+str(self.hour))
+        print("event_cards: "+str(self.event_cards))
+        print("zombies_cards: "+str(self.zombies_cards))
+        print("items_cards: "+str(self.items_cards))
+        print("items_cards_2: "+str(self.items_cards_2))
+        print("items_cards_3: "+str(self.items_cards_3))        
+        return
+               
     def credits(self,scaled_house_title,current_rect,position_mouse):
         cursor_group = pygame.sprite.Group()
         cursor_group.add(self.cursor_sprite)        

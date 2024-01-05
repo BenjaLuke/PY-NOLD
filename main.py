@@ -11,8 +11,9 @@ def main():
     inside_game = True
     
     while inside_game:
-        inside_game = screen.Menu()        
-        
+        screen.ResetValues()
+        # inside_game = screen.Menu()        
+        inside_game = False
     screen.endImage()
     sys.exit()
     
