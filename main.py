@@ -1,7 +1,7 @@
 import sys
 
 import graph
-
+import objects
 def main():
     
     datas = open("SAVE/lang.txt", "r")
@@ -11,9 +11,12 @@ def main():
     inside_game = True
     
     while inside_game:
-        screen.ResetValues()
-        # inside_game = screen.Menu()        
+        inside_game = screen.Menu()        
+
         inside_game = False
+    
+    input()
+        
     screen.endImage()
     sys.exit()
     
