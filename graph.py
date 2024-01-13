@@ -35,6 +35,8 @@ class image:
         self.image = 0
         self.back = pygame.image.load("ART/SCENE_12_BACK.png")
         self.front = pygame.image.load("ART/scene_12_FRONT.png")
+        self.image_front = pygame.image.load("ART/scene_11_FRONT.png")
+        self.image_back = pygame.image.load("ART/SCENE_11_BACK.png")
             
         # Imagen para el cursor
         self.cursor_sprite = CursorSprite("ART/CURSOR_ARROW.png", ((self.width*0.2)/3440))
@@ -288,9 +290,10 @@ class image:
         in_game = True
         while in_game:
             if self.turn == 1:
-                possible_paint = self.calculate_paint_house(self.Barbara)
-                if possible_paint == True:
-                    self.paint_house(self.Barbara)
+                self.calculate_paint_house(self.Barbara)
+                self.paint_house(1)
+                self.paint_between_walls()
+                self.paint_house(2)
                 self.Barbara.move()
                 self.Barbara.define_scene()
             
@@ -516,7 +519,7 @@ class image:
                                   
         # Crea los personajes
         self.Barbara = objects.Characters()
-        self.Barbara.creation(1,"Barbara",1,[1,1],11,1)
+        self.Barbara.creation(1,"Barbara",1,[38,40],11,1)
         
         
         self.zombiesOnStage = 0 # Contador de zombies en el escenario
@@ -579,31 +582,37 @@ class image:
         return options
     
     def calculate_paint_house(self,Character):
+        # Si la escena es distinta a la anterior, se pone la transparencia a 255 y se guarda la imagen
         if Character.scene != self.scene:
             self.transparence_all_image = 255
             self.image = self.screen.copy()
-
+            self.image_back = self.back.copy()
+            self.image_front = self.front.copy()
+                
+        # Definimos variables locales
         x = Character.location[0]
         y = Character.location[1]
         zoom = Character.zoom
         scene = Character.scene
+        
+        # Determinamos las x e y especiales si estamos en plantas distintas
         if scene == 12:
             x+=4
             y+=7
         if scene == 13:
             x-=2
             y-=5        
-        # Transformamos la x y la y en valores legibles
+            
+        # Calculamos el zoom    
         zoom = (self.width*zoom)/3440
-        
         if self.zoom > zoom:
             self.zoom -= 0.01
         elif self.zoom < zoom:
             self.zoom += 0.01
-        self.zoom = round(self.zoom,2) 
-         
-        xr = ((self.width*(2033*self.zoom))/3440) + ((x-1)*((self.width*(49*self.zoom))/3440))-((y-1)*((self.width*(49*self.zoom))/3440))
-        yr = y*((self.height*(24.5*self.zoom))/1440) + x*((self.height*(24.5*self.zoom))/1440) - ((self.height*(24.5*self.zoom))/1440)
+        
+        # Transformamos la x y la y en valores legibles        
+        xr = ((self.width*(2033*self.zoom))/3440) + ((x-1)*((self.width*(48.70*self.zoom))/3440))-((y-1)*((self.width*(48.70*self.zoom))/3440))
+        yr = y*((self.height*(24.35*self.zoom))/1440) + x*((self.height*(24.35*self.zoom))/1440) - ((self.height*(24.35*self.zoom))/1440)
         x = self.width/2 - xr
         y = self.height/2 - yr
 
@@ -611,6 +620,7 @@ class image:
         if scene != self.scene:
             self.back = pygame.image.load("ART/SCENE_"+str(scene)+"_BACK.png")
             self.front = pygame.image.load("ART/scene_"+str(scene)+"_FRONT.png")
+            
             self.scene = scene
         if self.y_house - y < 10*self.zoom and self.y_house - y > -10*self.zoom:
             self.y_house = y
@@ -624,61 +634,59 @@ class image:
             self.y_house -= ((self.y_house - y))/2
         elif self.y_house < y:
             self.y_house += ((y - self.y_house))/2
-                
-
-                    
-
-        
+            
         # Escalamos todas las imagenes al tamaño de zoom
-
         self.scene_house_back = pygame.transform.scale(self.back, (int(self.back.get_width() * self.zoom), int(self.back.get_height() * self.zoom)))    
         self.scene_house_front = pygame.transform.scale(self.front, (int(self.front.get_width() * self.zoom), int(self.front.get_height() * self.zoom)))               
-        if self.y_house == y and self.x_house == x and self.zoom == zoom and self.transparence_all_image == 0:
-            self.first_inititation = False
-            return  False
-        else:
-            return True
+        return
                
-    def paint_house(self,Character):
+    def paint_house(self,level):
         
-        # Pintamos el fondo
-        self.screen.fill((0,0,0))                
+                
 
         # Las ponemos en pantalla
-        self.screen.blit(self.scene_house_back, (self.x_house,self.y_house))
-        self.screen.blit(self.scene_house_front, (self.x_house,self.y_house))
-                
-        # Pintamos una cruz blanca que tiene como intersección el círculo y que mide 40x40 pixeles
+        if level == 1:
+            # Pintamos el fondo
+            self.screen.fill((0,0,0))            
+            self.screen.blit(self.scene_house_back, (self.x_house,self.y_house))
+        
+        elif level == 2:
+            self.screen.blit(self.scene_house_front, (self.x_house,self.y_house))
+                            
+            if self.transparence_all_image > 0:
+                self.transparence_all_image -= 50
+                if self.transparence_all_image < 0:
+                    self.transparence_all_image = 0
+                    self.first_inititation = False
+                if self.first_inititation == True:
+                    # Pintamos self.image a su tamaño normal en las posiciones (0,0)
+                    self.image.set_alpha(self.transparence_all_image)
+                    self.screen.blit(self.image, (0,0))
+                else:    
+                    
+                    # Le aplicamos el alfa correspondiente
+                    self.image_back.set_alpha(self.transparence_all_image)      
+                    self.image_front.set_alpha(self.transparence_all_image)
+                            
+                    # Ponemos la imagen en pantalla
+                    self.screen.blit(self.image_back, (self.x_house,self.y_house))
+                    self.screen.blit(self.image_front, (self.x_house,self.y_house))
+    
+                      
+            # Actualizamos la pantalla
+            pygame.display.flip()
+        
+        return
+    
+    def paint_between_walls(self):
+            # Pintamos una cruz blanca que tiene como intersección el círculo y que mide 40x40 pixeles
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2)-(47.6*self.zoom), int(self.height/2)), (int(self.width/2)+(47.6*self.zoom), int(self.height/2)), 2)
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2), int(self.height/2)-(22*self.zoom)), (int(self.width/2), int(self.height/2)+(22*self.zoom)), 2)
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2)-(47.6*self.zoom), int(self.height/2)), (int(self.width/2), int(self.height/2)-(22*self.zoom)), 2)
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2)-(47.6*self.zoom), int(self.height/2)), (int(self.width/2), int(self.height/2)+(22*self.zoom)), 2)
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2)+(47.6*self.zoom), int(self.height/2)), (int(self.width/2), int(self.height/2)-(22*self.zoom)), 2)
         pygame.draw.line(self.screen, (255,255,255), (int(self.width/2)+(47.6*self.zoom), int(self.height/2)), (int(self.width/2), int(self.height/2)+(22*self.zoom)), 2)
-            
-        if self.transparence_all_image > 0:
-            self.transparence_all_image -= 50
-            if self.transparence_all_image < 0:
-                self.transparence_all_image = 0
-                self.first_inititation = False
-            if self.first_inititation == True:
-                # Pintamos self.image a su tamaño normal en las posiciones (0,0)
-                self.image.set_alpha(self.transparence_all_image)
-                self.screen.blit(self.image, (0,0))
-            else:    
-                # Escalamos la imagen guarada en self.image al tamaño de zoom
-                self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * self.zoom), int(self.image.get_height() * self.zoom)))
-                # Le aplicamos el alfa correspondiente
-                self.image.set_alpha(self.transparence_all_image)                
-                # Ponemos la imagen en pantalla
-                self.screen.blit(self.image, (0,0))
-    
-                      
-        # Actualizamos la pantalla
-        pygame.display.flip()
-        
-        return
-                             
+        return                         
     def endImage(self):
         pygame.quit() 
         
