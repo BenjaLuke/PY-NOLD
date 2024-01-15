@@ -12,6 +12,7 @@ class WindowDoor:
         self.wood = 0 # Puntos de madera que refuerzan el objeto
         self.hinge = 0 # Eje: 1 - horizontal/izquierda 2 - horizontal/derecha 3 - vertical/arriba 4 - vertical/abajo
         self.open = 0 # 1 abre hacia la derecha o hacia abajo, 2 abre hacia la izquierda o hacia arriba
+        self.scenes = 0 # Escenas en las que se puede ver el objeto
         
 class InsideHouse:
     def __init__(self):
@@ -41,24 +42,39 @@ class Characters:
         self.location = location
         self.scene = scene
         self.zoom = zoom
-        
+        # Abre el archivo FIXED/limits.txt a
+        with open("FIXED/limits.txt","r") as tabla:
+            lines = tabla.readlines()        
+        # Crear una matriz (lista de listas) a partir de lines. cada linea tiene sus valors separados por "," y "\n" indica la siguiente linea de la matriz
+        matriz = []
+        for line in lines:
+            matriz.append(line.split(","))
+        for i in range(len(matriz)):
+            for j in range(len(matriz[i])):
+                matriz[i][j] = int(matriz[i][j])
+        self.limit = matriz
+        return
+    
     def move(self):
+        
+        # localiza el valor de self.limits segun self.location recordando que el primer valor es la x y el segundo la y
+        limit_now = self.limit[self.location[1]-1][self.location[0]-1]
         # Localiza que está pasando en el teclado
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and limit_now not in [2,3,6,7,10,11,14,15]:
                     self.location[0] -= 1
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT and limit_now not in [8,9,10,11,12,13,14,15]:
                     self.location[0] += 1
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP and limit_now not in [1,3,5,7,9,11,13,15]:
                     self.location[1] -= 1
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_DOWN and limit_now not in [4,5,6,7,12,13,14,15]:
                     self.location[1] += 1
     
     def define_scene(self):
         
         # Abre el archivo save.relation_location_screen.txt la primera linea es la x del personaje, el primer dato de cada linea es la y del personaje, dependiendo de su x y su y, se le asigna el valor intermedio como escena
-        with open("SAVE/relation_location_scene.txt","r") as tabla:
+        with open("FIXED/relation_location_scene.txt","r") as tabla:
             lines = tabla.readlines()
         
         # Crear una matriz (lista de listas) a partir de lines. cada linea tiene sus valors separados por "," y "\n" indica la siguiente linea de la matriz
